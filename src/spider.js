@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const Promise = require('bluebird');
 
 class Spider {
   constructor() {
@@ -14,13 +15,13 @@ class Spider {
       '/wiki/Hatchet',
       '/wiki/Kevin_Bacon',
       '/wiki/React_(JavaScript_library)',
-      '/Roman_Empire',
+      '/wiki/Roman_Empire',
       '/wiki/Star_Wars',
       '/wiki/Transhumanism',
     ];
 
     this._seen = new Set(this._queue);
-    this._linkCount = this._queue.size;
+    this._linkCount = this._queue.length;
   }
 
   async run() {
@@ -28,11 +29,11 @@ class Spider {
       const url = this._queue.shift();
 
       try {
+        console.log(`Parsing ${url}`)
+
         const page = await this.getPage(url);
-  
         this.parse(page);
   
-        console.log(`Parsed ${url}`)
         console.log(`Seen ${this._linkCount} links`);
         console.log(`${this._queue.length} in the queue`);
       } catch (error) {
@@ -58,7 +59,7 @@ class Spider {
     $('p').find('a').each((index, tag) => {
       let link = $(tag).attr('href');
 
-      if (RegExp('/wiki/((?!Wikipedia))').test(link)) {
+      if (RegExp('^/wiki/').test(link) && !RegExp('^/wiki/(File|Help|Wikipedia)').test(link)) {
         this._linkCount++;
 
         [ link ] = link.match(/\/wiki\/[^#]+/);
