@@ -9,7 +9,7 @@ class Spider {
     });
 
     this._queue = [
-      '/wiki/Adolf_Hitler',
+      '/wiki/Georgi_Aslanidi',
       '/wiki/Christianity',
       '/wiki/Gary_Busey',
       '/wiki/Hatchet',
@@ -55,10 +55,11 @@ class Spider {
 
   parse(page) {
     const $ = cheerio.load(page);
-
+    let pages = []; 
+    
     $('p').find('a').each((index, tag) => {
       let link = $(tag).attr('href');
-
+ 
       if (RegExp('^/wiki/').test(link) && !RegExp('^/wiki/(File|Help|Wikipedia)').test(link)) {
         this._linkCount++;
 
@@ -66,9 +67,12 @@ class Spider {
 
         if (!this._seen.has(link)) {
           this._seen.add(link);
+          console.log('seen', link);
           this._queue.push(link);
+          pages.push(link);
         }
       }
+      return pages;
     });
   }
 }
