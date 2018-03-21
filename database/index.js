@@ -6,16 +6,28 @@ const uri = process.env.DB_URI;
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
 const session = driver.session();
 
-let query = 'CREATE (n:Page { name: "name", primary_category: "primaryCategory" }) RETURN n'; 
-let resultPromise = session.writeTransaction(tx => tx.run(query));
+class Graph {
+  constructor() {
+    this._queue = {
+      parents: [], 
+      children: [], 
+    }; 
+    this._operating = false; 
+  }
 
-resultPromise.then(result => {
-  session.close();
+  addToQueue(parent, children) {
+    this._queue.parents.push(parent); 
+    this._queue.children.push(children); 
+    this.insert(); 
+  }
 
-  const rec = result.records[0];
-  const res = rec.get(0);
-  console.log(res);
+  insert(parent, children) {
+    if (!this._operating) {
 
-  driver.close();
-});
+    }
+  }
+  
+}
 
+
+module.exports = new Graph();
