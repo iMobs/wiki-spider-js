@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const Promise = require('bluebird');
+const db = require('../database'); 
 
 class Spider {
   constructor() {
@@ -10,14 +11,14 @@ class Spider {
 
     this._queue = [
       '/wiki/Georgi_Aslanidi',
-      '/wiki/Christianity',
-      '/wiki/Gary_Busey',
-      '/wiki/Hatchet',
-      '/wiki/Kevin_Bacon',
-      '/wiki/React_(JavaScript_library)',
-      '/wiki/Roman_Empire',
-      '/wiki/Star_Wars',
-      '/wiki/Transhumanism',
+      // '/wiki/Christianity',
+      // '/wiki/Gary_Busey',
+      // '/wiki/Hatchet',
+      // '/wiki/Kevin_Bacon',
+      // '/wiki/React_(JavaScript_library)',
+      // '/wiki/Roman_Empire',
+      // '/wiki/Star_Wars',
+      // '/wiki/Transhumanism',
     ];
 
     this._seen = new Set(this._queue);
@@ -27,15 +28,9 @@ class Spider {
   async run() {
     while (this._queue.length) {
       const url = this._queue.shift();
-
       try {
-        console.log(`Parsing ${url}`)
-
         const page = await this.getPage(url);
-        this.parse(page);
-  
-        console.log(`Seen ${this._linkCount} links`);
-        console.log(`${this._queue.length} in the queue`);
+        this.parse(url, page);
       } catch (error) {
         console.error(error);
       }
@@ -45,7 +40,6 @@ class Spider {
   async getPage(url) {
     try {
       const response = await this._axios.get(url);
-
       return response.data;
     } catch (error) {
       console.error(error);
@@ -53,13 +47,12 @@ class Spider {
     }
   }
 
-  parse(page) {
+  parse(url, page) {
+    url = url.slice(6); 
     const $ = cheerio.load(page);
     let pages = []; 
-    
     $('p').find('a').each((index, tag) => {
       let link = $(tag).attr('href');
- 
       if (RegExp('^/wiki/').test(link) && !RegExp('^/wiki/(File|Help|Wikipedia)').test(link)) {
         this._linkCount++;
 
@@ -67,14 +60,15 @@ class Spider {
 
         if (!this._seen.has(link)) {
           this._seen.add(link);
-          console.log('seen', link);
+          // console.log('seen', link);
           this._queue.push(link);
-          pages.push(link);
+          pages.push(link.slice(6));
         }
       }
-      return pages;
     });
+    db.addToQueue(url, pages);
   }
 }
 
 module.exports = new Spider();
+
