@@ -26,7 +26,7 @@ class Graph {
       let parent = this._queue.parents.shift(); 
       let children = this._queue.children.shift(); 
 
-      let query = 'WITH $children AS coll UNWIND coll AS child MERGE (n:Page { name: $parent }) MERGE (y)-[:LINKS_TO]->(m:Page { name: child }) RETURN n.name'; 
+      let query = 'WITH $children AS coll UNWIND coll AS child MERGE (n:Page { name: $parent }) MERGE (n)-[:LINKS_TO]->(m:Page { name: child }) RETURN n.name'; 
       
       let transaction = session.writeTransaction(tx => 
         tx.run(query, { parent: parent, children: children })
