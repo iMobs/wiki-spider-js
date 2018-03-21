@@ -4,7 +4,6 @@ const user = process.env.DB_USER;
 const password = process.env.DB_PASS; 
 const uri = process.env.DB_URI; 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
-const session = driver.session();
 
 class Graph {
   constructor() {
@@ -12,7 +11,6 @@ class Graph {
       parents: [], 
       children: [], 
     }; 
-    this._operating = false; 
   }
 
   addToQueue(parent, children) {
@@ -21,39 +19,25 @@ class Graph {
     this.insert(); 
   }
 
-  insert() {
-    if (!this._operating) {
+  async insert() {
+    const session = driver.session();
+    while (this._queue.parents.length) {
       let parent = this._queue.parents.shift(); 
       let children = this._queue.children.shift(); 
-
-      let query = 'WITH $children AS coll UNWIND coll AS child MERGE (n:Page { name: $parent }) MERGE (n)-[:LINKS_TO]->(m:Page { name: child }) RETURN n.name'; 
+      try {
+        const query = 'WITH $children AS coll UNWIND coll AS child MERGE (n:Page { name: $parent }) MERGE (n)-[:LINKS_TO]->(m:Page { name: child }) RETURN n.name'; 
       
-      let transaction = session.writeTransaction(tx => 
-        tx.run(query, { parent: parent, children: children })
-      )
-      transaction.then(result => {
-        session.close(); 
-        driver.close(); 
-        this._operating = true;
-        console.log(result) 
-      })
+        const transaction = await session.writeTransaction(tx => 
+          tx.run(query, { parent: parent, children: children })
+        )
+      } catch (error) {
+        console.log(error); 
+      }
+      
     }
+    session.close(); 
+    driver.close(); 
   }
-
 }
 
-
 module.exports = new Graph();
-
-
-
-// resultPromise.then(result => {
-//   session.close();
-
-//   const rec = result.records[0];
-//   const res = rec.get(0);
-//   console.log(res);
-
-//   driver.close();
-// });
-
