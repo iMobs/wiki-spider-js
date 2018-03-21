@@ -21,13 +21,39 @@ class Graph {
     this.insert(); 
   }
 
-  insert(parent, children) {
+  insert() {
     if (!this._operating) {
+      let parent = this._queue.parents.shift(); 
+      let children = this._queue.children.shift(); 
 
+      let query = 'WITH $children AS coll UNWIND coll AS child MERGE (n:Page { name: $parent }) MERGE (y)-[:LINKS_TO]->(m:Page { name: child }) RETURN n.name'; 
+      
+      let transaction = session.writeTransaction(tx => 
+        tx.run(query, { parent: parent, children: children })
+      )
+      transaction.then(result => {
+        session.close(); 
+        driver.close(); 
+        this._operating = true;
+        console.log(result) 
+      })
     }
   }
-  
+
 }
 
 
 module.exports = new Graph();
+
+
+
+// resultPromise.then(result => {
+//   session.close();
+
+//   const rec = result.records[0];
+//   const res = rec.get(0);
+//   console.log(res);
+
+//   driver.close();
+// });
+
