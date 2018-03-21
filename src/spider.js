@@ -10,15 +10,14 @@ class Spider {
     });
 
     this._queue = [
-      '/wiki/Georgi_Aslanidi',
-      // '/wiki/Christianity',
-      // '/wiki/Gary_Busey',
-      // '/wiki/Hatchet',
-      // '/wiki/Kevin_Bacon',
-      // '/wiki/React_(JavaScript_library)',
-      // '/wiki/Roman_Empire',
-      // '/wiki/Star_Wars',
-      // '/wiki/Transhumanism',
+      '/wiki/Christianity',
+      '/wiki/Gary_Busey',
+      '/wiki/Hatchet',
+      '/wiki/Kevin_Bacon',
+      '/wiki/React_(JavaScript_library)',
+      '/wiki/Roman_Empire',
+      '/wiki/Star_Wars',
+      '/wiki/Transhumanism',
     ];
 
     this._seen = new Set(this._queue);
@@ -60,7 +59,6 @@ class Spider {
 
         if (!this._seen.has(link)) {
           this._seen.add(link);
-          // console.log('seen', link);
           this._queue.push(link);
           pages.push(link.slice(6));
         }
