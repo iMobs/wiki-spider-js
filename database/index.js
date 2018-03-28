@@ -1,4 +1,3 @@
-require('dotenv').config(); 
 const neo4j = require('neo4j-driver').v1;
 const user = process.env.DB_USER; 
 const password = process.env.DB_PASS; 
