@@ -1,0 +1,27 @@
+version: '2.1'
+
+services:
+  spider:
+    image: imobley/wiki-spider-js
+    build: .
+    environment:
+      NODE_ENV: production
+      DB_USER: neo4j
+      DB_PASS: neo4j-password # Paste a new pass
+      DB_URI: bolt://neo4j
+    ports:
+      - 8080:8080
+    depends_on:
+      - neo4j
+
+  neo4j:
+    image: neo4j:latest
+    restart: unless-stopped
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - db_data:/data
+
+volumes:
+  db_data:
